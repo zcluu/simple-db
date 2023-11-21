@@ -1,5 +1,4 @@
-use sqlparser::ast::{ColumnOption, DataType, Statement, TableConstraint, Select, SelectItem, SetExpr, TableFactor, Expr, BinaryOperator};
-use sqlparser::ast::KillType::Query;
+use sqlparser::ast::{Statement, SetExpr, TableFactor, Expr, BinaryOperator};
 use sqlparser::dialect::AnsiDialect;
 use sqlparser::parser::Parser;
 
@@ -54,11 +53,7 @@ impl SelectQuery {
                         for f in froms {
                             if let TableFactor::Table {
                                 name,
-                                alias,
-                                args,
-                                with_hints,
-                                version,
-                                partitions
+                                ..
                             } = &f.relation {
                                 println!("Table Name: {name}");
                                 select_from = name.to_string();
