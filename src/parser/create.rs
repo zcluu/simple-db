@@ -2,6 +2,7 @@ use sqlparser::ast::{ColumnOption, DataType, Statement, TableConstraint};
 use sqlparser::dialect::AnsiDialect;
 use sqlparser::parser::Parser;
 
+#[derive(Debug)]
 pub struct ForeignKeyAttr {
     pub table: String,
     // current table's column
@@ -16,9 +17,10 @@ pub struct ColumnAttr {
     pub datatype: String,
     pub is_pk: bool,
     pub is_nullable: bool,
-    pub default: String,
+    pub default: Option<String>,
 }
 
+#[derive(Debug)]
 pub struct CreateQuery {
     pub tb_name: String,
     pub cols: Vec<ColumnAttr>,
@@ -30,13 +32,14 @@ impl CreateQuery {
         let dialect = AnsiDialect {};
         let binding = Parser::parse_sql(&dialect, &sql).unwrap();
         let statement: &Statement = binding.first().unwrap();
-        println!("Create Statement:{:?}", statement);
+        // println!("Create Statement:{:?}", statement);
         if let Statement::CreateTable {
             name,
             columns,
             constraints,
             ..
-        } = statement {
+        } = statement
+        {
             let tb_name = name.to_string();
             let mut curr_cols: Vec<String> = vec![];
             let mut cols: Vec<ColumnAttr> = vec![];
@@ -44,39 +47,40 @@ impl CreateQuery {
             for col in columns {
                 let col_name = col.name.to_string();
                 let data_type = match &col.data_type {
-                    DataType::Char(_) => { "char" }
-                    DataType::Decimal(_) => { "number" }
-                    DataType::Float(_) => { "float" }
-                    DataType::Int(_) => { "int" }
-                    DataType::Double => { "float" }
-                    DataType::Float(_) => { "float" }
-                    DataType::Boolean => { "bool" }
-                    DataType::Text => { "string" }
-                    DataType::Varchar(_) => { "string" }
-                    _ => {
-                        "Error data type."
-                    }
+                    DataType::Char(_) => "char",
+                    DataType::Float(_) => "float",
+                    DataType::Int(_) => "int",
+                    DataType::Double => "float",
+                    DataType::Boolean => "bool",
+                    DataType::Text => "string",
+                    DataType::Varchar(_) => "string",
+                    _ => "Error data type.",
                 };
                 let mut is_pk = false;
                 let mut is_nullable = true;
-                let mut default: String = String::new();
+                let mut default: Option<String> = None;
                 for opt in &col.options {
                     is_pk = match opt.option {
-                        ColumnOption::Unique { is_primary } => { is_primary }
-                        _ => { false }
+                        ColumnOption::Unique { is_primary } => is_primary,
+                        _ => false,
                     };
-                    if is_pk { is_nullable = false } else {
+                    if is_pk {
+                        is_nullable = false
+                    } else {
                         is_nullable = match opt.option {
                             ColumnOption::NotNull => false,
-                            _ => { true }
+                            _ => true,
                         };
                     }
                     default = match &opt.option {
-                        ColumnOption::Default(expr) => expr.to_string(),
-                        _ => { String::new() }
+                        ColumnOption::Default(expr) => Some(expr.to_string()),
+                        _ => None,
                     };
                 }
-                println!("Column Attr:{col_name} {data_type} {is_pk} {is_nullable} {:?}", default);
+                // println!(
+                //     "Column Attr:{col_name} {data_type} {is_pk} {is_nullable} {:?}",
+                //     default
+                // );
                 curr_cols.push(col_name.to_string());
                 cols.push(ColumnAttr {
                     name: col_name,
@@ -87,15 +91,14 @@ impl CreateQuery {
                 })
             }
             for constraint in constraints {
-                println!("{:?}", constraint);
+                // println!("{:?}", constraint);
                 if let TableConstraint::ForeignKey {
-                    name,
                     columns,
                     foreign_table,
                     referred_columns,
-                    on_delete,
-                    on_update
-                } = constraint {
+                    ..
+                } = constraint
+                {
                     let table = foreign_table.to_string();
                     let col_a = columns[0].value.to_string();
                     let col_b = referred_columns[0].value.to_string();
@@ -117,7 +120,6 @@ impl CreateQuery {
         }
     }
 }
-
 
 #[test]
 fn test_create_query_parsing() {
@@ -152,7 +154,7 @@ fn test_create_query_parsing() {
             assert_eq!(columns[1].datatype, "string");
             assert_eq!(columns[1].is_pk, false);
             assert_eq!(columns[1].is_nullable, true);
-            assert_eq!(columns[1].default, "Tom");
+            assert_eq!(columns[1].default, Some(String::from("Tom")));
 
             assert_eq!(columns[2].name, "role");
             assert_eq!(columns[2].datatype, "string");
@@ -163,24 +165,25 @@ fn test_create_query_parsing() {
             assert_eq!(columns[3].datatype, "int");
             assert_eq!(columns[3].is_pk, false);
             assert_eq!(columns[3].is_nullable, true);
-            assert_eq!(columns[3].default, "0");
+            assert_eq!(columns[3].default, Some(String::from("0")));
 
             assert_eq!(columns[4].name, "abcd_id");
             assert_eq!(columns[4].datatype, "int");
             assert_eq!(columns[4].is_pk, false);
             assert_eq!(columns[4].is_nullable, true);
-            assert_eq!(columns[4].default, "0");
+            assert_eq!(columns[4].default, Some(String::from("0")));
 
             assert_eq!(columns[5].name, "abcd_x");
             assert_eq!(columns[5].datatype, "int");
             assert_eq!(columns[5].is_pk, false);
             assert_eq!(columns[5].is_nullable, true);
-            assert_eq!(columns[5].default, "0");
+            assert_eq!(columns[5].default, Some(String::from("0")));
 
             assert_eq!(columns[6].name, "email");
             assert_eq!(columns[6].datatype, "string");
             assert_eq!(columns[6].is_pk, false);
             assert_eq!(columns[6].is_nullable, true);
+            assert_eq!(columns[6].default, None);
 
             assert_eq!(fkeys[0].table, "departments");
             assert_eq!(fkeys[0].col_a, "department_id");

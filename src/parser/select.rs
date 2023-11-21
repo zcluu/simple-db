@@ -1,9 +1,8 @@
-use sqlparser::ast::{Statement, SetExpr, TableFactor, Expr, BinaryOperator};
+use sqlparser::ast::{BinaryOperator, Expr, SetExpr, Statement, TableFactor};
 use sqlparser::dialect::AnsiDialect;
 use sqlparser::parser::Parser;
 
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum BinaryOpCus {
     // <
     Lt,
@@ -51,10 +50,7 @@ impl SelectQuery {
                         let froms = &select.from;
                         let exprs = &select.selection;
                         for f in froms {
-                            if let TableFactor::Table {
-                                name,
-                                ..
-                            } = &f.relation {
+                            if let TableFactor::Table { name, .. } = &f.relation {
                                 println!("Table Name: {name}");
                                 select_from = name.to_string();
                             }
@@ -66,16 +62,12 @@ impl SelectQuery {
                         }
                         for expr in exprs {
                             println!("{:?}", expr);
-                            if let Expr::BinaryOp {
-                                left, op, right
-                            } = expr {
+                            if let Expr::BinaryOp { left, op, right } = expr {
                                 let expr_op = match op {
-                                    BinaryOperator::Gt => { BinaryOpCus::Gt }
-                                    BinaryOperator::Lt => { BinaryOpCus::Lt }
-                                    BinaryOperator::Eq => { BinaryOpCus::Eq }
-                                    _ => {
-                                        BinaryOpCus::Eq
-                                    }
+                                    BinaryOperator::Gt => BinaryOpCus::Gt,
+                                    BinaryOperator::Lt => BinaryOpCus::Lt,
+                                    BinaryOperator::Eq => BinaryOpCus::Eq,
+                                    _ => BinaryOpCus::Eq,
                                 };
                                 println!("{left} {:?} {right}", expr_op);
                                 select_selections.push(WhereExpr {

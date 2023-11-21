@@ -1,4 +1,4 @@
-use sqlparser::ast::{Statement, SetExpr, Expr, Query, Value, Values};
+use sqlparser::ast::{Expr, Query, SetExpr, Statement, Value, Values};
 use sqlparser::dialect::AnsiDialect;
 use sqlparser::parser::Parser;
 
@@ -14,7 +14,7 @@ impl InsertQuery {
         let dialect = AnsiDialect {};
         let binding = Parser::parse_sql(&dialect, &sql).unwrap();
         let statement: &Statement = binding.first().unwrap();
-        let mut tb_name: Option<String> = None;
+        let tb_name: Option<String>;
         let mut cols_data: Vec<String> = vec![];
         let mut rows_data: Vec<Vec<String>> = vec![];
         if let Statement::Insert {
@@ -22,19 +22,21 @@ impl InsertQuery {
             columns,
             source,
             ..
-        } = statement {
+        } = statement
+        {
             tb_name = Some(table_name.to_string());
             for col in columns {
                 cols_data.push(col.value.to_string());
             }
             match &**source {
-                Query {
-                    body,
-                    ..
-                } => {
+                Query { body, .. } => {
                     // println!("{body}");
 
-                    if let SetExpr::Values(Values { explicit_row: _explicit_row, rows }) = &**body {
+                    if let SetExpr::Values(Values {
+                        explicit_row: _explicit_row,
+                        rows,
+                    }) = &**body
+                    {
                         for col_its in rows {
                             let mut row_vals: Vec<String> = vec![];
                             for it in col_its {
@@ -52,9 +54,9 @@ impl InsertQuery {
                                         Value::Null => {
                                             row_vals.push("NULL".to_string());
                                         }
-                                        _ => return Err(String::from("Invalid type."))
+                                        _ => return Err(String::from("Invalid type.")),
                                     },
-                                    _ => return Err(String::from("Invalid operation."))
+                                    _ => return Err(String::from("Invalid operation.")),
                                 }
                             }
                             rows_data.push(row_vals);
@@ -63,28 +65,27 @@ impl InsertQuery {
                         return Err(String::from("Invalid operation."));
                     }
                 }
-                _ => return Err(String::from("Invalid operation."))
             }
         } else {
             return Err(String::from("Invalid operation."));
         }
         match tb_name {
-            None => { return Err(String::from("Invalid operation.")); }
-            Some(ref tb) => {
-                Ok(InsertQuery {
-                    tb_name: tb_name.unwrap(),
-                    cols: cols_data,
-                    rows: rows_data,
-                })
+            None => {
+                return Err(String::from("Invalid operation."));
             }
+            Some(_) => Ok(InsertQuery {
+                tb_name: tb_name.unwrap(),
+                cols: cols_data,
+                rows: rows_data,
+            }),
         }
     }
 }
 
-
 #[test]
 fn test_insert_query_parsing() {
-    let sql = "INSERT INTO example_table (id, name, age) VALUES (1, 'John Doe', '25'),(2, 'Tom', '30');";
+    let sql =
+        "INSERT INTO example_table (id, name, age) VALUES (1, 'John Doe', '25'),(2, 'Tom', '30');";
     let dialect = AnsiDialect {};
     let ast = sqlparser::parser::Parser::parse_sql(&dialect, sql).unwrap();
     match ast.first().unwrap() {
