@@ -1,0 +1,40 @@
+[
+  Query(
+    Query
+    {
+      with: None,
+      body: Select(Select,
+              {
+                distinct: None,
+                top: None,
+                projection: [UnnamedExpr(Identifier(Ident { value: "id", quote_style: None })), UnnamedExpr(Identifier(Ident { value: "name", quote_style: None }))],
+                into: None,
+                from: [TableWithJoins { relation: Table { name: ObjectName([Ident { value: "employees", quote_style: None }]), alias: None, args: None, with_hints: [], version: None, partitions: [] }, joins: [] }],
+                lateral_views: [],
+                selection: Some(BinaryOp,
+                  {
+                    left: Identifier(Ident,
+                            {
+                              value: "id",
+                              quote_style: None
+                            }),
+                    op: Gt,
+                    right: Value(Number("1", false))
+                  }),
+                group_by: Expressions([]),
+                cluster_by: [],
+                distribute_by: [],
+                sort_by: [],
+                having: None,
+                named_window: [],
+                qualify: None
+              }),
+      order_by: [],
+      limit: None,
+      limit_by: [],
+      offset: None,
+      fetch: None,
+      locks: []
+    }
+  )
+]
