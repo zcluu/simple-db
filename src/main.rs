@@ -1,8 +1,35 @@
+use std::fs::File;
+use std::io::Read;
+
 mod parser;
 mod database;
 
+use crate::parser::create::CreateQuery;
+use crate::database::table;
+
+fn process_command(query: String, db: &mut database::db::Database) {
+    let query = CreateQuery::new(&*query).unwrap();
+    let tb = table::Table::new(query);
+    db.tables.push(tb);
+}
+
+
 fn main() {
-    println!("Hello, world!");
+    let db_filename = "simple_db.txt";
+    let mut db = database::db::Database::new();
+    let mut db_file = match File::open(db_filename) {
+        Ok(file) => { Some(file) }
+        Err(e) => None
+    };
+    assert!(!db_file.is_none());
+    let mut query: String = String::new();
+    let _ = db_file.unwrap().read_to_string(&mut query);
+    // println!("{query}");
+    process_command(query, &mut db);
+    // db.save_disk("data.bin");
+    let res = db.load_from_disk("data.bin");
+    println!("{:?}", res.unwrap());
+    return;
 }
 
 #[cfg(test)]

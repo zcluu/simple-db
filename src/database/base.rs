@@ -1,6 +1,8 @@
 use std::fmt;
 use std::fmt::Formatter;
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub enum DataType {
     Float,
     Int,
@@ -21,6 +23,7 @@ impl DataType {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct ColumnAttr {
     pub name: String,
     pub datatype: DataType,
@@ -48,6 +51,7 @@ impl std::fmt::Display for ColumnAttr {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub enum ColumnData {
     Int(Vec<i32>),
     Float(Vec<f32>),

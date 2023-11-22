@@ -7,3 +7,5 @@ edition = "2021"
 [dependencies]
 sqlparser = "*"
 prettytable-rs = "*"
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"

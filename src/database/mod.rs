@@ -1,3 +1,3 @@
 mod base;
 pub(crate) mod table;
-mod db;
+pub(crate) mod db;

@@ -1,8 +1,10 @@
 use crate::parser::create::CreateQuery;
 use crate::database;
 use std::collections::HashMap;
+use serde::{Serialize, Deserialize};
 use crate::database::base::{ColumnAttr, ColumnData, DataType};
 
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Table {
     pub name: String,
     pub columns: Vec<database::base::ColumnAttr>,
@@ -13,7 +15,7 @@ impl Table {
     pub fn new(cq: CreateQuery) -> Table {
         let tb_name = cq.tb_name;
         let columns = cq.cols;
-        println!("{:?}", columns);
+        // println!("{:?}", columns);
         let mut tb_cols: Vec<ColumnAttr> = vec![];
         let mut tb_col_map: HashMap<String, ColumnData> = HashMap::new();
         for column in &columns {
