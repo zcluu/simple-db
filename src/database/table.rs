@@ -1,14 +1,15 @@
 use crate::parser::create::CreateQuery;
-use crate::database;
 use std::collections::HashMap;
+use prettytable::row;
 use serde::{Serialize, Deserialize};
 use crate::database::base::{ColumnAttr, ColumnData, DataType};
+use prettytable::{Cell, Row, Table as PTable};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Table {
     pub name: String,
-    pub columns: Vec<database::base::ColumnAttr>,
-    pub col_map: HashMap<String, database::base::ColumnData>,
+    pub columns: Vec<ColumnAttr>,
+    pub col_map: HashMap<String, ColumnData>,
 }
 
 impl Table {
@@ -37,5 +38,64 @@ impl Table {
             columns: tb_cols,
             col_map: tb_col_map,
         }
+    }
+
+    pub fn insert_row(&mut self, cols: Vec<String>, rows: Vec<Vec<String>>) {
+        for col_ix in 0..cols.len() {
+            let col_name = &cols[col_ix];
+            if let Some(col_data) = self.col_map.get_mut(&col_name.to_string()) {
+                for row in &rows {
+                    let col_val = &row[col_ix];
+                    match col_data {
+                        ColumnData::Int(v) => { v.push(col_val.parse::<i32>().unwrap()) }
+                        ColumnData::Float(v) => { v.push(col_val.parse::<f32>().unwrap()) }
+                        ColumnData::Str(v) => { v.push(col_val.to_string()) }
+                        ColumnData::Bool(v) => { v.push(col_val.parse::<bool>().unwrap()) }
+                        ColumnData::None => { panic!("Invalid column datatype.") }
+                    }
+                }
+            }
+        }
+    }
+
+
+    pub fn print_table_data(&self) {
+        let mut p_table = PTable::new();
+
+        let cnames = self
+            .columns
+            .iter()
+            .map(|col| col.name.to_string())
+            .collect::<Vec<String>>();
+
+        let header_row = Row::new(
+            cnames
+                .iter()
+                .map(|col| Cell::new(&col))
+                .collect::<Vec<Cell>>(),
+        );
+
+        let first_col_data = self.col_map.get(&self.columns.first().unwrap().name).unwrap();
+        let num_rows = first_col_data.count();
+        let mut print_table_rows: Vec<Row> = vec![Row::new(vec![]); num_rows];
+
+        for col_name in &cnames {
+            let col_val = self
+                .col_map
+                .get(col_name)
+                .expect("Can't find any rows with the given column");
+            let columns: Vec<String> = col_val.get_all_data();
+
+            for i in 0..num_rows {
+                print_table_rows[i].add_cell(Cell::new(&columns[i]));
+            }
+        }
+
+        p_table.add_row(header_row);
+        for row in print_table_rows {
+            p_table.add_row(row);
+        }
+
+        p_table.printstd();
     }
 }

@@ -1,5 +1,6 @@
 use std::fmt;
 use std::fmt::Formatter;
+use std::vec::IntoIter;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -61,7 +62,7 @@ pub enum ColumnData {
 }
 
 impl ColumnData {
-    fn get_all_data(&self) -> Vec<String> {
+    pub fn get_all_data(&self) -> Vec<String> {
         match &self {
             ColumnData::Int(x) => x.iter().map(|v| v.to_string()).collect(),
             ColumnData::Float(x) => x.iter().map(|v| v.to_string()).collect(),
@@ -71,7 +72,7 @@ impl ColumnData {
         }
     }
 
-    fn get_data_by_ix(&self, ix: &Vec<usize>) -> Vec<String> {
+    pub fn get_data_by_ix(&self, ix: &Vec<usize>) -> Vec<String> {
         let mut data_list: Vec<String> = vec![];
         let all_data = self.get_all_data();
         for i in ix {
@@ -80,7 +81,7 @@ impl ColumnData {
         data_list
     }
 
-    fn count(&self) -> usize {
+    pub fn count(&self) -> usize {
         self.get_all_data().len()
     }
 }

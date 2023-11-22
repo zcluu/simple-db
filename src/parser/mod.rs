@@ -1,4 +1,3 @@
 pub(crate) mod create;
-mod insert;
-mod select;
-// mod create_custom;
+pub(crate) mod insert;
+pub(crate) mod select;

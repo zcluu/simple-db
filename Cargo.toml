@@ -9,3 +9,5 @@ sqlparser = "*"
 prettytable-rs = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
+sha2 = "*"
+hex = "*"
