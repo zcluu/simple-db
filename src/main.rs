@@ -1,9 +1,9 @@
-use std::fs::File;
 use std::io::{Read, stdin, stdout, Write};
 
 mod parser;
 mod database;
 mod utils;
+mod sys_command;
 
 use crate::parser::{
     create::CreateQuery,
@@ -11,7 +11,18 @@ use crate::parser::{
     select::SelectQuery,
 };
 use crate::database::table::Table;
-use crate::utils::{CommandType, DbSystem, Password};
+use crate::utils::{CommandType, DbSystem, SysCommand};
+
+fn process_sys_command(query: String, db: &mut database::db::Database) {
+    match SysCommand::new(query.clone()) {
+        SysCommand::CreateDatabase => { sys_command::create_db(query).unwrap() }
+        SysCommand::UseDatabase => { sys_command::use_db(query, db).unwrap() }
+        SysCommand::DropDatabase => { sys_command::drop_db(query).unwrap() }
+        SysCommand::ShowDatabases => { sys_command::show_databases().unwrap() }
+        SysCommand::ChangePassword => {}
+        SysCommand::SysInfo => {}
+    }
+}
 
 fn process_command(query: String, db: &mut database::db::Database) {
     match CommandType::new(query.clone()) {
@@ -19,16 +30,29 @@ fn process_command(query: String, db: &mut database::db::Database) {
             let query = CreateQuery::new(&*query).unwrap();
             let tb = Table::new(query);
             db.create_table(tb);
+            db.save_disk().unwrap();
         }
         CommandType::Insert => {
             let query = InsertQuery::new(&*query).unwrap();
             db.insert_row(query.tb_name, query.cols, query.rows);
+            db.save_disk().unwrap();
         }
         CommandType::Select => {
             let query = SelectQuery::new(&*query).unwrap();
+            let tb_name = query.from.clone();
+            let tb = db.get_table(tb_name);
+            tb.select_data(query);
+
+        }
+        CommandType::ShowTable => {
+            let vars = query.split(" ").collect::<Vec<&str>>();
+            assert_eq!(vars.len(), 2);
+            let tb_name = vars[1];
+            let tb = db.get_table(tb_name.to_string());
+            tb.print_table_data();
         }
         CommandType::System => {
-            println!("System command.");
+            process_sys_command(query, db);
         }
     }
 }
@@ -36,26 +60,6 @@ fn process_command(query: String, db: &mut database::db::Database) {
 
 fn main() {
     let mut sys: DbSystem = DbSystem::new();
-    // let mut db = database::db::Database::new();
-    // db.load_from_disk("data.bin").unwrap();
-    // let db_filename = "simple_db.txt";
-    // let mut db_file = match File::open(db_filename) {
-    //     Ok(file) => { Some(file) }
-    //     Err(e) => None
-    // };
-    // assert!(!db_file.is_none());
-    // let mut query: String = String::new();
-    // let _ = db_file.unwrap().read_to_string(&mut query);
-    // println!("{query}");
-    // let create_sql = "CREATE TABLE example_table (
-    //     id INT PRIMARY KEY,
-    //     name VARCHAR(100) NOT NULL DEFAULT Tom,
-    //     age INT NOT NULL,
-    // );";
-    // // process_command(create_sql.to_string(), &mut db);
-    //
-    // let insert_sql = "INSERT INTO example_table (id, name, age) VALUES (1, 'John Doe', '25'),(2, 'Tom', '30');";
-    // process_command(insert_sql.to_string(), &mut db);
     let mut command = String::new();
     loop {
         print!("login: ");
@@ -74,10 +78,14 @@ fn main() {
             break;
         }
     }
-
+    command = "".to_string();
     let mut db = database::db::Database::new();
     loop {
-        print!("simple-db> ");
+        if db.db_name.is_empty() {
+            print!("simple-db> ");
+        } else {
+            print!("simple-db[{}]> ", db.db_name);
+        }
         stdout().flush().unwrap();
         stdin()
             .read_line(&mut command)

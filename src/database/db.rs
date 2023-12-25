@@ -6,19 +6,24 @@ use std::io::{self, Write};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Database {
+    pub db_name: String,
     pub tables: Vec<Table>,
 }
 
 impl Database {
     pub fn new() -> Database {
-        return Database { tables: vec![] };
+        return Database { db_name: "".to_string(), tables: vec![] };
+    }
+
+    pub fn set_dbname(&mut self, db_name: String) {
+        self.db_name = db_name;
     }
 
     pub fn create_table(&mut self, tb: Table) {
         if self.check_table(tb.name.clone()) {
             panic!("Table {} is existed.", tb.name)
         }
-        self.tables.push(tb)
+        self.tables.push(tb);
     }
 
     pub fn check_table(&self, tb_name: String) -> bool {
@@ -45,9 +50,9 @@ impl Database {
         let mut tb: &mut Table = self.get_table_mut(tb_name.clone());
         tb.insert_row(cols, rows);
     }
-    pub fn save_disk(&self, filename: &str) -> io::Result<()> {
+    pub fn save_disk(&self) -> io::Result<()> {
         let serialized_data = serde_json::to_string(&self)?;
-        let mut file = File::create(filename)?;
+        let mut file = File::create("sql_files/".to_owned() + self.db_name.to_string().as_str() + ".bin")?;
         file.write_all(serialized_data.as_bytes())?;
         Ok(())
     }

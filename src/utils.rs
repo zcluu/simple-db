@@ -35,6 +35,7 @@ pub enum CommandType {
     CreateTable,
     Insert,
     Select,
+    ShowTable,
     System,
 }
 
@@ -45,7 +46,32 @@ impl CommandType {
             "create" => CommandType::CreateTable,
             "insert" => CommandType::Insert,
             "select" => CommandType::Select,
+            "show" => CommandType::ShowTable,
             "sys" => CommandType::System,
+            _ => panic!("Invalid command.")
+        }
+    }
+}
+
+pub enum SysCommand {
+    CreateDatabase,
+    UseDatabase,
+    DropDatabase,
+    ShowDatabases,
+    ChangePassword,
+    SysInfo,
+}
+
+impl SysCommand {
+    pub fn new(command: String) -> SysCommand {
+        let vars = command.split(" ").collect::<Vec<&str>>();
+        match vars[1].to_lowercase().as_str() {
+            "createdb" => SysCommand::CreateDatabase,
+            "usedb" => SysCommand::UseDatabase,
+            "dropdb" => SysCommand::DropDatabase,
+            "showdb" => SysCommand::ShowDatabases,
+            "changepwd" => SysCommand::ChangePassword,
+            "showsys" => SysCommand::SysInfo,
             _ => panic!("Invalid command.")
         }
     }
@@ -70,7 +96,7 @@ impl DbSystem {
             sys_username: "".to_string(),
             sys_password: Password { hashed_password: "".to_string() },
         };
-        sys.load_cfg();
+        sys.load_cfg().unwrap();
         sys
     }
 
