@@ -36,6 +36,7 @@ pub enum CommandType {
     Insert,
     Select,
     ShowTable,
+    TableInfo,
     System,
 }
 
@@ -47,6 +48,7 @@ impl CommandType {
             "insert" => CommandType::Insert,
             "select" => CommandType::Select,
             "show" => CommandType::ShowTable,
+            "tableinfo" => CommandType::TableInfo,
             "sys" => CommandType::System,
             _ => panic!("Invalid command.")
         }

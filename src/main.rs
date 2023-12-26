@@ -42,14 +42,20 @@ fn process_command(query: String, db: &mut database::db::Database) {
             let tb_name = query.from.clone();
             let tb = db.get_table(tb_name);
             tb.select_data(query);
-
         }
         CommandType::ShowTable => {
             let vars = query.split(" ").collect::<Vec<&str>>();
             assert_eq!(vars.len(), 2);
-            let tb_name = vars[1];
-            let tb = db.get_table(tb_name.to_string());
+            let tb_name = vars[1].to_string();
+            let tb = db.get_table(tb_name);
             tb.print_table_data();
+        }
+        CommandType::TableInfo => {
+            let vars = query.split(" ").collect::<Vec<&str>>();
+            assert_eq!(vars.len(), 2);
+            let tb_name = vars[1].to_string();
+            let tb = db.get_table(tb_name);
+            tb.show_info();
         }
         CommandType::System => {
             process_sys_command(query, db);

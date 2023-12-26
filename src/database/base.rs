@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Formatter;
 use std::vec::IntoIter;
@@ -22,6 +23,15 @@ impl DataType {
             _ => DataType::Invalid,
         }
     }
+    pub fn data_type(&self) -> String {
+        match self {
+            DataType::Float => { "float".to_string() }
+            DataType::Int => { "int".to_string() }
+            DataType::Bool => { "bool".to_string() }
+            DataType::String => { "string".to_string() }
+            DataType::Invalid => { "null".to_string() }
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -43,6 +53,16 @@ impl ColumnAttr {
             is_nullable,
             default,
         }
+    }
+
+    pub fn attr(&self) -> HashMap<String, String> {
+        let mut row: HashMap<String, String> = HashMap::new();
+        row.insert("name".to_string(), self.name.to_string());
+        row.insert("datatype".to_string(), self.datatype.data_type());
+        row.insert("is_pk".to_string(), self.is_pk.to_string());
+        row.insert("is_nullable".to_string(), self.is_nullable.to_string());
+        row.insert("default".to_string(), self.default.clone().unwrap_or("None".to_string()));
+        row
     }
 }
 

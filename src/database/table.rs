@@ -4,7 +4,7 @@ use std::fmt;
 use std::fmt::{Formatter};
 use serde::{Serialize, Deserialize};
 use crate::database::base::{ColumnAttr, ColumnData, DataType};
-use prettytable::{Cell, Row, Table as PTable};
+use prettytable::{Cell, Row, row, Table as PTable};
 use crate::parser::select::{BinaryOpCus, Condition, SelectQuery};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -188,6 +188,17 @@ impl Table {
                 }
             }
         }
+    }
+
+    pub fn show_info(&self) {
+        let mut headers = vec!["name", "datatype", "is_pk", "is_nullable", "default"];
+        let rows = self.columns.iter().map(|c| c.attr()).collect::<Vec<HashMap<String, String>>>();
+        let pt = PrettyTable::create(
+            self.name.to_string(),
+            headers.iter().map(|c| c.to_string()).collect::<Vec<String>>(),
+            rows,
+        );
+        println!("{pt}")
     }
 
     pub fn print_table_data(&self) {
