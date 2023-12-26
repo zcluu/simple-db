@@ -4,7 +4,7 @@ use std::fmt;
 use std::fmt::{Formatter};
 use serde::{Serialize, Deserialize};
 use crate::database::base::{ColumnAttr, ColumnData, DataType};
-use prettytable::{Cell, Row, row, Table as PTable};
+use prettytable::{Cell, Row, Table as PTable};
 use crate::parser::select::{BinaryOpCus, Condition, SelectQuery};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
