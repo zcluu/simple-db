@@ -76,3 +76,10 @@ FROM users;
 ```
 
 支持多条件查询
+
+### TODO
+- 多表查询
+- 在表里查表
+- update
+- join
+- primary key

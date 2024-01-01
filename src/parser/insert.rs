@@ -1,6 +1,6 @@
 use sqlparser::ast::{Expr, Query, SetExpr, Statement, Value, Values};
 use sqlparser::dialect::AnsiDialect;
-use sqlparser::parser::Parser;
+use crate::parser::utils::parse_sql;
 
 #[derive(Debug)]
 pub struct InsertQuery {
@@ -10,10 +10,7 @@ pub struct InsertQuery {
 }
 
 impl InsertQuery {
-    pub fn new(sql: &str) -> Result<InsertQuery, String> {
-        let dialect = AnsiDialect {};
-        let binding = Parser::parse_sql(&dialect, &sql).unwrap();
-        let statement: &Statement = binding.first().unwrap();
+    pub fn format_stat(statement: Statement) -> Result<InsertQuery, String> {
         let tb_name: Option<String>;
         let mut cols_data: Vec<String> = vec![];
         let mut rows_data: Vec<Vec<String>> = vec![];
@@ -28,14 +25,12 @@ impl InsertQuery {
             for col in columns {
                 cols_data.push(col.value.to_string());
             }
-            match &**source {
+            match *source {
                 Query { body, .. } => {
-                    // println!("{body}");
-
                     if let SetExpr::Values(Values {
                         explicit_row: _explicit_row,
                         rows,
-                    }) = &**body
+                    }) = *body
                     {
                         for col_its in rows {
                             let mut row_vals: Vec<String> = vec![];
@@ -91,7 +86,8 @@ fn test_insert_query_parsing() {
     match ast.first().unwrap() {
         Statement::Insert { .. } => {
             let rows_result = vec![vec!["1", "John Doe", "25"], vec!["2", "Tom", "30"]];
-            let insert_query = InsertQuery::new(sql).unwrap();
+            let state = parse_sql(sql);
+            let insert_query = InsertQuery::format_stat(state).unwrap();
             println!("{:?}", insert_query);
             assert_eq!("example_table", insert_query.tb_name);
             assert_eq!(vec!["id", "name", "age"], insert_query.cols);

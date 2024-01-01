@@ -1,9 +1,9 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Formatter;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum DataType {
     Float,
     Int,
@@ -24,16 +24,28 @@ impl DataType {
     }
     pub fn data_type(&self) -> String {
         match self {
-            DataType::Float => { "float".to_string() }
-            DataType::Int => { "int".to_string() }
-            DataType::Bool => { "bool".to_string() }
-            DataType::String => { "string".to_string() }
-            DataType::Invalid => { "null".to_string() }
+            DataType::Float => "float".to_string(),
+            DataType::Int => "int".to_string(),
+            DataType::Bool => "bool".to_string(),
+            DataType::String => "string".to_string(),
+            DataType::Invalid => "null".to_string(),
         }
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+impl fmt::Display for DataType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            DataType::Float => f.write_str("float"),
+            DataType::Int => f.write_str("int"),
+            DataType::Bool => f.write_str("bool"),
+            DataType::String => f.write_str("string"),
+            DataType::Invalid => f.write_str("null"),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ColumnAttr {
     pub name: String,
     pub datatype: DataType,
@@ -43,7 +55,13 @@ pub struct ColumnAttr {
 }
 
 impl ColumnAttr {
-    pub fn new(name: String, data_type: String, is_pk: bool, is_nullable: bool, default: Option<String>) -> ColumnAttr {
+    pub fn new(
+        name: String,
+        data_type: String,
+        is_pk: bool,
+        is_nullable: bool,
+        default: Option<String>,
+    ) -> ColumnAttr {
         let datatype = DataType::new(data_type);
         ColumnAttr {
             name,
@@ -60,7 +78,10 @@ impl ColumnAttr {
         row.insert("datatype".to_string(), self.datatype.data_type());
         row.insert("is_pk".to_string(), self.is_pk.to_string());
         row.insert("is_nullable".to_string(), self.is_nullable.to_string());
-        row.insert("default".to_string(), self.default.clone().unwrap_or("None".to_string()));
+        row.insert(
+            "default".to_string(),
+            self.default.clone().unwrap_or("None".to_string()),
+        );
         row
     }
 }
@@ -71,24 +92,70 @@ impl std::fmt::Display for ColumnAttr {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct ForeignKeyAttr {
+    pub table: String,
+    // current table's column
+    pub col_a: String,
+    // referred table's column
+    pub col_b: String,
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub enum ColumnData {
-    Int(Vec<i32>),
-    Float(Vec<f32>),
-    Str(Vec<String>),
-    Bool(Vec<bool>),
+    Int(Vec<Option<i32>>),
+    Float(Vec<Option<f32>>),
+    Str(Vec<Option<String>>),
+    Bool(Vec<Option<bool>>),
     None,
 }
 
 impl ColumnData {
     pub fn get_all_data(&self) -> Vec<String> {
-        match &self {
-            ColumnData::Int(x) => x.iter().map(|v| v.to_string()).collect(),
-            ColumnData::Float(x) => x.iter().map(|v| v.to_string()).collect(),
-            ColumnData::Str(x) => x.iter().map(|v| v.to_string()).collect(),
-            ColumnData::Bool(x) => x.iter().map(|v| v.to_string()).collect(),
+        let result = match &self {
+            ColumnData::Int(x) => x
+                .iter()
+                .map(|v| {
+                    if let Some(value) = v {
+                        value.to_string()
+                    } else {
+                        "".to_string()
+                    }
+                })
+                .collect::<Vec<String>>(),
+            ColumnData::Float(x) => x
+                .iter()
+                .map(|v| {
+                    if let Some(value) = v {
+                        value.to_string()
+                    } else {
+                        "".to_string()
+                    }
+                })
+                .collect::<Vec<String>>(),
+            ColumnData::Str(x) => x
+                .iter()
+                .map(|v| {
+                    if let Some(value) = v {
+                        value.to_string()
+                    } else {
+                        "".to_string()
+                    }
+                })
+                .collect::<Vec<String>>(),
+            ColumnData::Bool(x) => x
+                .iter()
+                .map(|v| {
+                    if let Some(value) = v {
+                        value.to_string()
+                    } else {
+                        "".to_string()
+                    }
+                })
+                .collect::<Vec<String>>(),
             ColumnData::None => panic!("Invalid column datatype."),
-        }
+        };
+        result
     }
 
     pub fn get_data_by_ix(&self, ix: &Vec<usize>) -> Vec<String> {
@@ -102,5 +169,15 @@ impl ColumnData {
 
     pub fn count(&self) -> usize {
         self.get_all_data().len()
+    }
+
+    pub fn update_val(&mut self, ix: usize, val: String) {
+        match self {
+            ColumnData::Int(v) => { v[ix] = Option::from(val.parse::<i32>().unwrap()) }
+            ColumnData::Float(v) => { v[ix] = Option::from(val.parse::<f32>().unwrap()) }
+            ColumnData::Str(v) => { v[ix] = Option::from(val) }
+            ColumnData::Bool(v) => { v[ix] = Option::from(val.parse::<bool>().unwrap()) }
+            ColumnData::None => {}
+        }
     }
 }

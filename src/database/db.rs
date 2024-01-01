@@ -1,6 +1,6 @@
 use crate::database::table::Table;
+use serde::{Deserialize, Serialize};
 use serde_json;
-use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::io::{self, Write};
 
@@ -12,7 +12,10 @@ pub struct Database {
 
 impl Database {
     pub fn new() -> Database {
-        return Database { db_name: "".to_string(), tables: vec![] };
+        return Database {
+            db_name: "".to_string(),
+            tables: vec![],
+        };
     }
 
     pub fn set_dbname(&mut self, db_name: String) {
@@ -24,6 +27,10 @@ impl Database {
             panic!("Table {} is existed.", tb.name)
         }
         self.tables.push(tb);
+    }
+
+    pub fn drop_table(&mut self, drop_tbs: Vec<String>) {
+        self.tables.retain(|table| !drop_tbs.contains(&table.name));
     }
 
     pub fn check_table(&self, tb_name: String) -> bool {
@@ -46,13 +53,15 @@ impl Database {
         }
         panic!("Table {} is not existed.", tb_name)
     }
+
     pub fn insert_row(&mut self, tb_name: String, cols: Vec<String>, rows: Vec<Vec<String>>) {
-        let mut tb: &mut Table = self.get_table_mut(tb_name.clone());
+        let tb: &mut Table = self.get_table_mut(tb_name.clone());
         tb.insert_row(cols, rows);
     }
     pub fn save_disk(&self) -> io::Result<()> {
         let serialized_data = serde_json::to_string(&self)?;
-        let mut file = File::create("sql_files/".to_owned() + self.db_name.to_string().as_str() + ".bin")?;
+        let mut file =
+            File::create("sql_files/".to_owned() + self.db_name.to_string().as_str() + ".bin")?;
         file.write_all(serialized_data.as_bytes())?;
         Ok(())
     }

@@ -1,7 +1,7 @@
-use std::collections::HashMap;
 use crate::database::db::Database;
-use std::fs;
 use crate::database::table::PrettyTable;
+use std::collections::HashMap;
+use std::fs;
 
 fn database_exists(db_name: &str) -> bool {
     let file_path = format!("sql_files/{}.bin", db_name);

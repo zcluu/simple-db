@@ -1,71 +1,14 @@
-use std::io::{Read, stdin, stdout, Write};
+use std::io::{stdin, stdout, Write};
+use system::commands::parser::process_command;
 
-mod parser;
 mod database;
-mod utils;
-mod sys_command;
+mod parser;
+mod system;
 
-use crate::parser::{
-    create::CreateQuery,
-    insert::InsertQuery,
-    select::SelectQuery,
-};
-use crate::database::table::Table;
-use crate::utils::{CommandType, DbSystem, SysCommand};
-
-fn process_sys_command(query: String, db: &mut database::db::Database) {
-    match SysCommand::new(query.clone()) {
-        SysCommand::CreateDatabase => { sys_command::create_db(query).unwrap() }
-        SysCommand::UseDatabase => { sys_command::use_db(query, db).unwrap() }
-        SysCommand::DropDatabase => { sys_command::drop_db(query).unwrap() }
-        SysCommand::ShowDatabases => { sys_command::show_databases().unwrap() }
-        SysCommand::ChangePassword => {}
-        SysCommand::SysInfo => {}
-    }
-}
-
-fn process_command(query: String, db: &mut database::db::Database) {
-    match CommandType::new(query.clone()) {
-        CommandType::CreateTable => {
-            let query = CreateQuery::new(&*query).unwrap();
-            let tb = Table::new(query);
-            db.create_table(tb);
-            db.save_disk().unwrap();
-        }
-        CommandType::Insert => {
-            let query = InsertQuery::new(&*query).unwrap();
-            db.insert_row(query.tb_name, query.cols, query.rows);
-            db.save_disk().unwrap();
-        }
-        CommandType::Select => {
-            let query = SelectQuery::new(&*query).unwrap();
-            let tb_name = query.from.clone();
-            let tb = db.get_table(tb_name);
-            tb.select_data(query);
-        }
-        CommandType::ShowTable => {
-            let vars = query.split(" ").collect::<Vec<&str>>();
-            assert_eq!(vars.len(), 2);
-            let tb_name = vars[1].to_string();
-            let tb = db.get_table(tb_name);
-            tb.print_table_data();
-        }
-        CommandType::TableInfo => {
-            let vars = query.split(" ").collect::<Vec<&str>>();
-            assert_eq!(vars.len(), 2);
-            let tb_name = vars[1].to_string();
-            let tb = db.get_table(tb_name);
-            tb.show_info();
-        }
-        CommandType::System => {
-            process_sys_command(query, db);
-        }
-    }
-}
-
+use crate::system::dbs::DbSystem;
 
 fn main() {
-    let mut sys: DbSystem = DbSystem::new();
+    let sys: DbSystem = DbSystem::new();
     let mut command = String::new();
     loop {
         print!("login: ");
@@ -104,7 +47,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use crate::parser::create::CreateQuery;
-    use crate::database::table;
+    use crate::parser::utils::parse_sql;
 
     #[test]
     fn test_create_table_new() {
@@ -120,7 +63,7 @@ mod tests {
         FOREIGN KEY (abcd_id) REFERENCES abcds(id),
         FOREIGN KEY (abcd_x) REFERENCES abcds(x)
     );";
-        let query = CreateQuery::new(sql).unwrap();
-        table::Table::new(query);
+        let state = parse_sql(sql);
+        let query = CreateQuery::format_stat(state);
     }
 }
