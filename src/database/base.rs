@@ -101,7 +101,7 @@ pub struct ForeignKeyAttr {
     pub col_b: String,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug,Clone)]
 pub enum ColumnData {
     Int(Vec<Option<i32>>),
     Float(Vec<Option<f32>>),
@@ -177,6 +177,24 @@ impl ColumnData {
             ColumnData::Float(v) => { v[ix] = Option::from(val.parse::<f32>().unwrap()) }
             ColumnData::Str(v) => { v[ix] = Option::from(val) }
             ColumnData::Bool(v) => { v[ix] = Option::from(val.parse::<bool>().unwrap()) }
+            ColumnData::None => {}
+        }
+    }
+
+    pub fn delete_val(&mut self, ixs: Vec<usize>) {
+        match self {
+            ColumnData::Int(v) => {
+                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<i32>>>();
+            }
+            ColumnData::Float(v) => {
+                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<f32>>>();
+            }
+            ColumnData::Str(v) => {
+                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<String>>>();
+            }
+            ColumnData::Bool(v) => {
+                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<bool>>>();
+            }
             ColumnData::None => {}
         }
     }

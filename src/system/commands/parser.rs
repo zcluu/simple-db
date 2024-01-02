@@ -18,6 +18,7 @@ pub fn process_command(query: String, db: &mut database::db::Database) {
         r#type::CommandType::CreateTable => NC::create_tb(query, db),
         r#type::CommandType::Insert => NC::insert_data(query, db),
         r#type::CommandType::Select => NC::select_data(query, db),
+        r#type::CommandType::Delete => NC::delete_data(query, db),
         r#type::CommandType::Drop => NC::drop_tb(query, db),
         r#type::CommandType::Update => NC::update_data(query, db),
         r#type::CommandType::ShowTable => NC::show_tb_data(query, db),

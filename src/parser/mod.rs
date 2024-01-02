@@ -6,3 +6,4 @@ pub(crate) mod join;
 pub(crate) mod update;
 pub(crate) mod utils;
 pub(crate) mod condition;
+pub(crate) mod delete;
