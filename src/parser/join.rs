@@ -1,3 +1,4 @@
+use crate::system::errors::Errors;
 use sqlparser::ast::{Expr, Join, JoinOperator, TableFactor, TableWithJoins};
 
 #[derive(Debug, Clone)]
@@ -28,7 +29,7 @@ pub enum FromType {
 }
 
 impl FromType {
-    pub fn new(joins: Vec<TableWithJoins>) -> Vec<FromType> {
+    pub fn new(joins: Vec<TableWithJoins>) -> Result<Vec<FromType>, Errors> {
         let mut join_data_vec: Vec<FromType> = Vec::new();
         for join in joins {
             let relation = join.clone().relation;
@@ -54,12 +55,8 @@ impl FromType {
                         JoinOperator::Inner(constraint) => (JoinType::Inner, constraint),
                         JoinOperator::LeftOuter(constraint) => (JoinType::Left, constraint),
                         JoinOperator::RightOuter(constraint) => (JoinType::Right, constraint),
-                        JoinOperator::FullOuter(constraint) => {
-                            (JoinType::FullOuter, constraint)
-                        }
-                        _ => {
-                            panic!("")
-                        }
+                        JoinOperator::FullOuter(constraint) => (JoinType::FullOuter, constraint),
+                        _ => return Err(Errors::UnimplementedOperation),
                     };
 
                     if let sqlparser::ast::JoinConstraint::On(expr) = join_constraint {
@@ -89,6 +86,6 @@ impl FromType {
                 }
             }
         }
-        join_data_vec
+        Ok(join_data_vec)
     }
 }

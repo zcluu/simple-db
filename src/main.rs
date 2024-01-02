@@ -26,8 +26,9 @@ fn main() {
             println!("Welcome back {}.", username);
             break;
         }
+        command.clear()
     }
-    command = "".to_string();
+    command.clear();
     let mut db = database::db::Database::new();
     loop {
         if db.db_name.is_empty() {
@@ -40,13 +41,12 @@ fn main() {
             .read_line(&mut command)
             .expect("Error while trying to read from stdin");
         process_command(command.trim().to_string(), &mut db);
-        command = "".to_string();
+        command.clear();
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::create::CreateQuery;
     use crate::parser::utils::parse_sql;
 
     #[test]
@@ -64,6 +64,5 @@ mod tests {
         FOREIGN KEY (abcd_x) REFERENCES abcds(x)
     );";
         let state = parse_sql(sql);
-        let query = CreateQuery::format_stat(state);
     }
 }

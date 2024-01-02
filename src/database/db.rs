@@ -1,4 +1,5 @@
 use crate::database::table::Table;
+use crate::system::errors::Errors;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::File;
@@ -22,11 +23,12 @@ impl Database {
         self.db_name = db_name;
     }
 
-    pub fn create_table(&mut self, tb: Table) {
+    pub fn create_table(&mut self, tb: Table) -> Result<(), Errors> {
         if self.check_table(tb.name.clone()) {
-            panic!("Table {} is existed.", tb.name)
+            return Err(Errors::TableExisted(tb.name));
         }
         self.tables.push(tb);
+        Ok(())
     }
 
     pub fn drop_table(&mut self, drop_tbs: Vec<String>) {
@@ -37,25 +39,31 @@ impl Database {
         self.tables.iter().any(|v| v.name == tb_name)
     }
 
-    pub fn get_table(&self, tb_name: String) -> &Table {
+    pub fn get_table(&self, tb_name: String) -> Result<&Table, Errors> {
         for tb in &self.tables {
             if tb.name == tb_name {
-                return tb;
+                return Ok(tb);
             }
         }
-        panic!("Table {} is not existed.", tb_name)
+        Err(Errors::TableNotExisted(tb_name))
     }
-    pub fn get_table_mut(&mut self, tb_name: String) -> &mut Table {
+    pub fn get_table_mut(&mut self, tb_name: String) -> Result<&mut Table, Errors> {
         for tb in &mut self.tables {
             if tb.name == tb_name {
-                return tb;
+                return Ok(tb);
             }
         }
-        panic!("Table {} is not existed.", tb_name)
+        Err(Errors::TableNotExisted(tb_name))
     }
 
     pub fn insert_row(&mut self, tb_name: String, cols: Vec<String>, rows: Vec<Vec<String>>) {
-        let tb: &mut Table = self.get_table_mut(tb_name.clone());
+        let tb: &mut Table = match self.get_table_mut(tb_name.clone()) {
+            Ok(v) => v,
+            Err(err) => {
+                err.print();
+                return;
+            }
+        };
         tb.insert_row(cols, rows);
     }
     pub fn save_disk(&self) -> io::Result<()> {

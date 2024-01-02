@@ -1,3 +1,4 @@
+use crate::system::errors::Errors;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
@@ -101,7 +102,7 @@ pub struct ForeignKeyAttr {
     pub col_b: String,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug,Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum ColumnData {
     Int(Vec<Option<i32>>),
     Float(Vec<Option<f32>>),
@@ -111,7 +112,7 @@ pub enum ColumnData {
 }
 
 impl ColumnData {
-    pub fn get_all_data(&self) -> Vec<String> {
+    pub fn get_all_data(&self) -> Result<Vec<String>, Errors> {
         let result = match &self {
             ColumnData::Int(x) => x
                 .iter()
@@ -153,30 +154,38 @@ impl ColumnData {
                     }
                 })
                 .collect::<Vec<String>>(),
-            ColumnData::None => panic!("Invalid column datatype."),
+            ColumnData::None => return Err(Errors::InvalidColumnType),
         };
-        result
+        Ok(result)
     }
 
-    pub fn get_data_by_ix(&self, ix: &Vec<usize>) -> Vec<String> {
+    pub fn get_data_by_ix(&self, ix: &Vec<usize>) -> Result<Vec<String>, Errors> {
         let mut data_list: Vec<String> = vec![];
-        let all_data = self.get_all_data();
+        let all_data = match self.get_all_data() {
+            Ok(v) => v,
+            Err(err) => {
+                return Err(err);
+            }
+        };
         for i in ix {
             data_list.push(String::from(&all_data[*i]));
         }
-        data_list
+        Ok(data_list)
     }
 
-    pub fn count(&self) -> usize {
-        self.get_all_data().len()
+    pub fn count(&self) -> Result<usize, Errors> {
+        match self.get_all_data() {
+            Ok(v) => Ok(v.len()),
+            Err(err) => Err(err),
+        }
     }
 
     pub fn update_val(&mut self, ix: usize, val: String) {
         match self {
-            ColumnData::Int(v) => { v[ix] = Option::from(val.parse::<i32>().unwrap()) }
-            ColumnData::Float(v) => { v[ix] = Option::from(val.parse::<f32>().unwrap()) }
-            ColumnData::Str(v) => { v[ix] = Option::from(val) }
-            ColumnData::Bool(v) => { v[ix] = Option::from(val.parse::<bool>().unwrap()) }
+            ColumnData::Int(v) => v[ix] = Option::from(val.parse::<i32>().unwrap()),
+            ColumnData::Float(v) => v[ix] = Option::from(val.parse::<f32>().unwrap()),
+            ColumnData::Str(v) => v[ix] = Option::from(val),
+            ColumnData::Bool(v) => v[ix] = Option::from(val.parse::<bool>().unwrap()),
             ColumnData::None => {}
         }
     }
@@ -184,16 +193,36 @@ impl ColumnData {
     pub fn delete_val(&mut self, ixs: Vec<usize>) {
         match self {
             ColumnData::Int(v) => {
-                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<i32>>>();
+                *v = v
+                    .iter()
+                    .enumerate()
+                    .filter(|(ix, _)| !ixs.contains(ix))
+                    .map(|(_, val)| val.to_owned())
+                    .collect::<Vec<Option<i32>>>();
             }
             ColumnData::Float(v) => {
-                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<f32>>>();
+                *v = v
+                    .iter()
+                    .enumerate()
+                    .filter(|(ix, _)| !ixs.contains(ix))
+                    .map(|(_, val)| val.to_owned())
+                    .collect::<Vec<Option<f32>>>();
             }
             ColumnData::Str(v) => {
-                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<String>>>();
+                *v = v
+                    .iter()
+                    .enumerate()
+                    .filter(|(ix, _)| !ixs.contains(ix))
+                    .map(|(_, val)| val.to_owned())
+                    .collect::<Vec<Option<String>>>();
             }
             ColumnData::Bool(v) => {
-                *v = v.iter().enumerate().filter(|(ix, _)| !ixs.contains(ix)).map(|(_, val)| val.to_owned()).collect::<Vec<Option<bool>>>();
+                *v = v
+                    .iter()
+                    .enumerate()
+                    .filter(|(ix, _)| !ixs.contains(ix))
+                    .map(|(_, val)| val.to_owned())
+                    .collect::<Vec<Option<bool>>>();
             }
             ColumnData::None => {}
         }

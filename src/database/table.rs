@@ -1,15 +1,16 @@
 use crate::database::base::{ColumnAttr, ColumnData, DataType, ForeignKeyAttr};
+use crate::parser::condition::Condition;
 use crate::parser::create::CreateQuery;
 use crate::parser::join::JoinInfo;
 use crate::parser::select::{BinaryOpCus, SelectQuery};
-use crate::parser::condition::Condition;
+use crate::system::errors::Errors;
+use crate::system::utils::{custom_strip, wildcard_match};
 use prettytable::Attr;
 use prettytable::{Cell, Row, Table as PTable};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fmt::Formatter;
-use crate::system::utils::{custom_strip, wildcard_match};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Table {
@@ -159,7 +160,13 @@ impl Table {
         binding.sort_by_key(|k| proj_loc.get(k));
         projection = &binding;
 
-        let mut rows: Vec<HashMap<String, String>> = self.get_rows();
+        let mut rows: Vec<HashMap<String, String>> = match self.get_rows() {
+            Ok(v) => v,
+            Err(err) => {
+                err.print();
+                return;
+            }
+        };
         rows = self.filter_rows(condition, rows.clone(), Option::from(projection).cloned());
 
         let pt = PrettyTable::create("".to_string(), projection.to_vec(), rows);
@@ -315,8 +322,8 @@ impl Table {
         }
     }
 
-    pub fn get_rows(&self) -> Vec<HashMap<String, String>> {
-        let row_nums = self
+    pub fn get_rows(&self) -> Result<Vec<HashMap<String, String>>, Errors> {
+        let row_nums = match self
             .col_map
             .get(
                 &self
@@ -330,20 +337,31 @@ impl Table {
                     .to_owned(),
             )
             .unwrap()
-            .count();
-        (0..row_nums)
+            .count()
+        {
+            Ok(v) => v,
+            Err(err) => {
+                return Err(err);
+            }
+        };
+        let rows = (0..row_nums)
             .map(|rid| {
                 self.col_map
                     .iter()
                     .map(|(k, v)| {
+                        let data = v.get_data_by_ix(&vec![rid]);
                         (
                             k.to_owned(),
-                            v.get_data_by_ix(&vec![rid]).first().unwrap().to_owned(),
+                            data.expect(Errors::InvalidColumnType.to_string().as_str())
+                                .first()
+                                .unwrap()
+                                .to_owned(),
                         )
                     })
                     .collect::<HashMap<String, String>>()
             })
-            .collect::<Vec<HashMap<String, String>>>()
+            .collect::<Vec<HashMap<String, String>>>();
+        Ok(rows)
     }
 
     pub fn filter_rows(
@@ -436,6 +454,7 @@ impl Table {
             .map(|(k, v)| {
                 let val = v
                     .get_data_by_ix(vec![row_ix].as_ref())
+                    .expect(Errors::InvalidColumnType.to_string().as_str())
                     .first()
                     .unwrap()
                     .to_owned();
@@ -494,7 +513,13 @@ impl Table {
             .col_map
             .get(&self.columns.first().unwrap().name)
             .unwrap();
-        let num_rows = first_col_data.count();
+        let num_rows = match first_col_data.count() {
+            Ok(v) => v,
+            Err(err) => {
+                err.print();
+                return;
+            }
+        };
         let mut print_table_rows: Vec<Row> = vec![Row::new(vec![]); num_rows];
 
         for col_name in &cnames {
@@ -502,7 +527,13 @@ impl Table {
                 .col_map
                 .get(col_name)
                 .expect("Can't find any rows with the given column");
-            let columns: Vec<String> = col_val.get_all_data();
+            let columns: Vec<String> = match col_val.get_all_data() {
+                Ok(v) => v,
+                Err(err) => {
+                    err.print();
+                    return;
+                }
+            };
 
             for i in 0..num_rows {
                 print_table_rows[i].add_cell(Cell::new(&columns[i]));
@@ -571,7 +602,6 @@ impl fmt::Display for PrettyTable {
         if !self.rows.is_empty() {
             let num_rows = self.rows.len();
             pt_rows = vec![Row::new(vec![]); num_rows];
-            println!("{:?}", self.header);
             for col in &self.header {
                 for i in 0..num_rows {
                     pt_rows[i].add_cell(Cell::new(self.rows[i].get(col).unwrap()));

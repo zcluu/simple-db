@@ -1,6 +1,7 @@
 use crate::database::base::{ColumnAttr, DataType, ForeignKeyAttr};
-use sqlparser::ast::{ColumnOption, DataType as ParserDataType, Statement, TableConstraint};
 use crate::parser::utils::parse_sql;
+use crate::system::errors::Errors;
+use sqlparser::ast::{ColumnOption, DataType as ParserDataType, Statement, TableConstraint};
 
 #[derive(Debug)]
 pub struct CreateQuery {
@@ -10,7 +11,7 @@ pub struct CreateQuery {
 }
 
 impl CreateQuery {
-    pub fn format_stat(statement: Statement) -> Result<CreateQuery, String> {
+    pub fn format_stat(statement: Statement) -> Result<CreateQuery, Errors> {
         if let Statement::CreateTable {
             name,
             columns,
@@ -55,10 +56,6 @@ impl CreateQuery {
                         _ => None,
                     };
                 }
-                // println!(
-                //     "Column Attr:{col_name} {data_type} {is_pk} {is_nullable} {:?}",
-                //     default
-                // );
                 curr_cols.push(col_name.to_string());
                 cols.push(ColumnAttr {
                     name: col_name,
@@ -69,7 +66,6 @@ impl CreateQuery {
                 })
             }
             for constraint in constraints {
-                // println!("{:?}", constraint);
                 if let TableConstraint::ForeignKey {
                     columns,
                     foreign_table,
@@ -80,7 +76,9 @@ impl CreateQuery {
                     let table = foreign_table.to_string();
                     let col_a = columns[0].value.to_string();
                     let col_b = referred_columns[0].value.to_string();
-                    assert!(curr_cols.contains(&col_a));
+                    if !curr_cols.contains(&col_a) {
+                        return Err(Errors::ElementNotFound);
+                    }
                     fkeys.push(ForeignKeyAttr {
                         table,
                         col_a,
@@ -94,7 +92,7 @@ impl CreateQuery {
                 foreign_key: fkeys,
             })
         } else {
-            Err("Error".to_string())
+            Err(Errors::InvalidExpression)
         }
     }
 }
@@ -114,7 +112,7 @@ fn test_create_query_parsing() {
         FOREIGN KEY (abcd_x) REFERENCES abcds(x)
     );";
     let state = parse_sql(sql);
-    let create_query_result = CreateQuery::format_stat(state);
+    let create_query_result = CreateQuery::format_stat(state.unwrap());
     let create_query = create_query_result.unwrap();
     assert_eq!(create_query.tb_name, "employees");
     let columns = create_query.cols;

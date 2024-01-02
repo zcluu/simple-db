@@ -1,11 +1,14 @@
+use crate::system::errors::Errors;
 use sqlparser::ast::Statement;
 use sqlparser::dialect::AnsiDialect;
-use sqlparser::parser::Parser;
+use sqlparser::parser::{Parser};
 
-pub fn parse_sql(sql: &str) -> Statement {
+pub fn parse_sql(sql: &str) -> Result<Statement, Errors> {
     let dialect = AnsiDialect {};
-    let binding = Parser::parse_sql(&dialect, &sql).unwrap();
+    let binding = match Parser::parse_sql(&dialect, &sql) {
+        Ok(v) => v,
+        Err(_) => return Err(Errors::ParseSQLError),
+    };
     let statement: &Statement = binding.first().unwrap();
-    statement.to_owned()
+    Ok(statement.to_owned())
 }
-

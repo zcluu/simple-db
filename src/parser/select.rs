@@ -1,10 +1,9 @@
-use crate::parser::join::FromType;
-use sqlparser::ast::{
-    SetExpr, Statement,
-};
-use std::option::Option;
 use crate::parser::condition::Condition;
+use crate::parser::join::FromType;
 use crate::parser::utils::parse_sql;
+use crate::system::errors::Errors;
+use sqlparser::ast::{SetExpr, Statement};
+use std::option::Option;
 
 #[derive(Debug, PartialEq)]
 pub enum BinaryOpCus {
@@ -26,7 +25,7 @@ pub struct SelectQuery {
 }
 
 impl SelectQuery {
-    pub fn format_stat(statement: Statement) -> Result<SelectQuery, String> {
+    pub fn format_stat(statement: Statement) -> Result<SelectQuery, Errors> {
         let mut select_from: Vec<FromType> = vec![];
         let mut select_projections: Vec<String> = vec![];
         let mut select_condition: Option<Condition> = None;
@@ -37,16 +36,25 @@ impl SelectQuery {
                     let froms = &select.from;
                     let exprs = &select.selection;
                     if !exprs.is_none() {
-                        select_condition = Some(Condition::from_expr(&exprs.clone().unwrap()));
+                        let condition = Condition::from_expr(&exprs.clone().unwrap());
+                        match condition {
+                            Ok(v) => select_condition = Some(v),
+                            Err(e) => {
+                                return Err(e);
+                            }
+                        }
                     }
-                    select_from = FromType::new(froms.to_owned());
+                    select_from = match FromType::new(froms.to_owned()) {
+                        Ok(v) => v,
+                        Err(err) => return Err(err),
+                    };
                     for projection in projects {
                         let cname = projection.to_string();
                         select_projections.push(cname);
                     }
                 }
                 _ => {
-                    return Err("Error".to_string());
+                    return Err(Errors::InvalidExpression);
                 }
             },
             _ => {}
@@ -59,14 +67,13 @@ impl SelectQuery {
     }
 }
 
-
 #[test]
 pub fn test_select() {
     let sql = "SELECT articles.id, articles.title, articles.userid, users.username FROM articles JOIN users ON articles.userid = users.id;";
     let stat = parse_sql(sql);
-    let query = SelectQuery::format_stat(stat);
+    let _query = SelectQuery::format_stat(stat.unwrap());
 
     let sql2 = "SELECT id,username from users;";
     let stat2 = parse_sql(sql2);
-    let query2 = SelectQuery::format_stat(stat2);
+    let _query2 = SelectQuery::format_stat(stat2.unwrap());
 }

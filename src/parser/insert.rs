@@ -1,6 +1,7 @@
+use crate::parser::utils::parse_sql;
+use crate::system::errors::Errors;
 use sqlparser::ast::{Expr, Query, SetExpr, Statement, Value, Values};
 use sqlparser::dialect::AnsiDialect;
-use crate::parser::utils::parse_sql;
 
 #[derive(Debug)]
 pub struct InsertQuery {
@@ -10,7 +11,7 @@ pub struct InsertQuery {
 }
 
 impl InsertQuery {
-    pub fn format_stat(statement: Statement) -> Result<InsertQuery, String> {
+    pub fn format_stat(statement: Statement) -> Result<InsertQuery, Errors> {
         let tb_name: Option<String>;
         let mut cols_data: Vec<String> = vec![];
         let mut rows_data: Vec<Vec<String>> = vec![];
@@ -49,24 +50,24 @@ impl InsertQuery {
                                         Value::Null => {
                                             row_vals.push("NULL".to_string());
                                         }
-                                        _ => return Err(String::from("Invalid type.")),
+                                        _ => return Err(Errors::InvalidExpression),
                                     },
-                                    _ => return Err(String::from("Invalid operation.")),
+                                    _ => return Err(Errors::InvalidExpression),
                                 }
                             }
                             rows_data.push(row_vals);
                         }
                     } else {
-                        return Err(String::from("Invalid operation."));
+                        return Err(Errors::InvalidExpression);
                     }
                 }
             }
         } else {
-            return Err(String::from("Invalid operation."));
+            return Err(Errors::InvalidExpression);
         }
         match tb_name {
             None => {
-                return Err(String::from("Invalid operation."));
+                return Err(Errors::InvalidExpression);
             }
             Some(_) => Ok(InsertQuery {
                 tb_name: tb_name.unwrap(),
@@ -87,7 +88,7 @@ fn test_insert_query_parsing() {
         Statement::Insert { .. } => {
             let rows_result = vec![vec!["1", "John Doe", "25"], vec!["2", "Tom", "30"]];
             let state = parse_sql(sql);
-            let insert_query = InsertQuery::format_stat(state).unwrap();
+            let insert_query = InsertQuery::format_stat(state.unwrap()).unwrap();
             println!("{:?}", insert_query);
             assert_eq!("example_table", insert_query.tb_name);
             assert_eq!(vec!["id", "name", "age"], insert_query.cols);

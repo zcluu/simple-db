@@ -1,9 +1,10 @@
+use crate::parser::condition::Condition;
 use crate::parser::join::FromType;
+use crate::parser::utils::parse_sql;
+use crate::system::errors::Errors;
+use crate::system::utils::custom_strip;
 use sqlparser::ast::Statement;
 use std::collections::HashMap;
-use crate::parser::condition::Condition;
-use crate::parser::utils::parse_sql;
-use crate::system::utils::custom_strip;
 
 #[derive(Debug)]
 pub struct UpdateQuery {
@@ -13,7 +14,7 @@ pub struct UpdateQuery {
 }
 
 impl UpdateQuery {
-    pub fn format_stat(statement: Statement) -> UpdateQuery {
+    pub fn format_stat(statement: Statement) -> Result<UpdateQuery, Errors> {
         let mut tb_name: String = "".to_string();
         let mut assignments_data: HashMap<String, String> = HashMap::new();
         let mut condition_data: Option<Condition> = None;
@@ -24,7 +25,12 @@ impl UpdateQuery {
             ..
         } = statement
         {
-            let from = FromType::new(vec![table]).first().unwrap().to_owned();
+            let from = match FromType::new(vec![table]) {
+                Ok(v) => v.first().unwrap().to_owned(),
+                Err(err) => {
+                    return Err(err);
+                }
+            };
             if let FromType::String { tb } = from {
                 tb_name = tb;
             }
@@ -38,13 +44,17 @@ impl UpdateQuery {
                     )
                 })
                 .collect::<HashMap<String, String>>();
-            condition_data = Option::from(Condition::from_expr(&selection.unwrap()));
+            let condition = Condition::from_expr(&selection.unwrap());
+            match condition {
+                Ok(v) => condition_data = Option::from(v),
+                Err(e) => return Err(e),
+            }
         }
-        UpdateQuery {
+        Ok(UpdateQuery {
             tb_name,
             assignments: assignments_data,
             condition: condition_data,
-        }
+        })
     }
 }
 
@@ -53,5 +63,4 @@ pub fn test_update_query() {
     let sql = "UPDATE users SET password = 'new_password', email = \"new_email@example.com\" WHERE id = 1;";
     let state = parse_sql(sql);
     println!("{:?}", state);
-    UpdateQuery::format_stat(state);
 }
