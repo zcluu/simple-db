@@ -421,13 +421,14 @@ impl Table {
             .col_map
             .get(&join_info.left_column)
             .unwrap()
-            .get_all_data();
+            .get_all_data()
+            .unwrap();
         let right_col_data = tb2
             .col_map
             .get(&join_info.right_column)
             .unwrap()
-            .get_all_data();
-
+            .get_all_data()
+            .unwrap();
         for (left_ix, left_row) in left_col_data.iter().enumerate() {
             if left_row.is_empty() {
                 continue;

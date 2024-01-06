@@ -29,21 +29,21 @@ impl Errors {
 impl fmt::Display for Errors {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Errors::UnimplementedOperation => { f.write_str("This operation is unimplemented.") }
-            Errors::InvalidExpression => { f.write_str("Expression is invalid.") }
-            Errors::InvalidPattern => { f.write_str("InvalidPattern.") }
-            Errors::MissingLeftOperand => { f.write_str("MissingLeftOperand.") }
-            Errors::MissingRightOperand => { f.write_str("MissingRightOperand.") }
-            Errors::UnsupportedDataType => { f.write_str("UnsupportedDataType.") }
-            Errors::ElementNotFound => { f.write_str("ElementNotFound.") }
-            Errors::DatabaseNotExisted => { f.write_str("DatabaseNotExisted.") }
-            Errors::DiskSaveError => { f.write_str("DiskSaveError.") }
-            Errors::FileSystemError => { f.write_str("FileSystemError.") }
-            Errors::ParseSQLError => { f.write_str("ParseSQLError.") }
-            Errors::InvalidCommand => { f.write_str("InvalidCommand.") }
-            Errors::TableNotExisted(s) => { f.write_str(format!("Table {} is not existed.", s).as_str()) }
-            Errors::TableExisted(s) => { f.write_str(format!("Table {} is existed.", s).as_str()) }
-            Errors::InvalidColumnType => { f.write_str("InvalidColumnType") }
+            Errors::UnimplementedOperation => { f.write_str("This operation is unimplemented.\n") }
+            Errors::InvalidExpression => { f.write_str("Expression is invalid.\n") }
+            Errors::InvalidPattern => { f.write_str("InvalidPattern.\n") }
+            Errors::MissingLeftOperand => { f.write_str("MissingLeftOperand.\n") }
+            Errors::MissingRightOperand => { f.write_str("MissingRightOperand.\n") }
+            Errors::UnsupportedDataType => { f.write_str("UnsupportedDataType.\n") }
+            Errors::ElementNotFound => { f.write_str("ElementNotFound.\n") }
+            Errors::DatabaseNotExisted => { f.write_str("DatabaseNotExisted.\n") }
+            Errors::DiskSaveError => { f.write_str("DiskSaveError.\n") }
+            Errors::FileSystemError => { f.write_str("FileSystemError.\n") }
+            Errors::ParseSQLError => { f.write_str("ParseSQLError.\n") }
+            Errors::InvalidCommand => { f.write_str("InvalidCommand.\n") }
+            Errors::TableNotExisted(s) => { f.write_str(format!("Table {} is not existed.\n", s).as_str()) }
+            Errors::TableExisted(s) => { f.write_str(format!("Table {} is existed.\n", s).as_str()) }
+            Errors::InvalidColumnType => { f.write_str("InvalidColumnType\n") }
         }
     }
 }
