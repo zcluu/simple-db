@@ -83,6 +83,7 @@ pub fn help(command: String) {
         println!("{}", tips::use_db());
         println!("{}", tips::drop_db());
         println!("{}", tips::show_dbs());
+        println!("{}", tips::change_pwd());
     } else if vars.len() == 3 {
         if vars[2].eq("create") { println!("{}", tips::create_table(true)) }
         if vars[2].eq("drop") { println!("{}", tips::drop_table(true)) }

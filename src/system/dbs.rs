@@ -43,6 +43,11 @@ impl DbSystem {
         Ok(())
     }
 
+    pub fn change_pwd(&mut self, pwd: String) -> io::Result<()> {
+        self.sys_password.set_password(pwd.as_str());
+        self.update_info()
+    }
+
     pub fn init_cfg() {
         let file_path = "cfg.bin".to_string();
         if fs::metadata(file_path).is_ok() {
@@ -54,8 +59,8 @@ impl DbSystem {
                 sys_username: "root".to_string(),
                 sys_password: Password::new("123456"),
             }
-            .update_info()
-            .unwrap();
+                .update_info()
+                .unwrap();
             if !fs::metadata("sql_files").is_ok() {
                 fs::create_dir("sql_files").unwrap();
             }

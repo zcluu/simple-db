@@ -9,7 +9,7 @@ use crate::system::dbs::DbSystem;
 
 fn main() {
     DbSystem::init_cfg();
-    let sys: DbSystem = DbSystem::new();
+    let mut sys: DbSystem = DbSystem::new();
     let mut command = String::new();
     loop {
         print!("login: ");

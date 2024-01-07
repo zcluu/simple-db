@@ -25,15 +25,17 @@ pub fn drop_table(sample: bool) -> String {
         Color::Green.paint("table_name")
     );
     if sample {
-        result = result + "\n" + format!(
-            "{} {}",
-            Color::Red.bold().paint("Drop table"),
-            Color::Green.paint("articles")
-        ).as_str();
+        result = result
+            + "\n"
+            + format!(
+                "{} {}",
+                Color::Red.bold().paint("Drop table"),
+                Color::Green.paint("articles")
+            )
+            .as_str();
     }
     result
 }
-
 
 pub fn select_data(sample: bool) -> String {
     let mut result = format!(
@@ -46,15 +48,20 @@ pub fn select_data(sample: bool) -> String {
         Color::RGB(240, 240, 240).paint("<where conditions>")
     );
     if sample {
-        result = result + "\n" + format!(
-            "{} {} {} {} {} {}",
-            Color::Red.bold().paint("Select"),
-            Color::Green.paint("*"),
-            Color::Red.bold().paint("from"),
-            Color::Green.paint("articles"),
-            Color::RGB(240, 240, 240).paint("Join users On articles.user_id=users.id"),
-            Color::RGB(240, 240, 240).paint("Where articles.title like \"%Hello World%\" and users.username like \"user_\"")
-        ).as_str();
+        result = result
+            + "\n"
+            + format!(
+                "{} {} {} {} {} {}",
+                Color::Red.bold().paint("Select"),
+                Color::Green.paint("*"),
+                Color::Red.bold().paint("from"),
+                Color::Green.paint("articles"),
+                Color::RGB(240, 240, 240).paint("Join users On articles.user_id=users.id"),
+                Color::RGB(240, 240, 240).paint(
+                    "Where articles.title like \"%Hello World%\" and users.username like \"user_\""
+                )
+            )
+            .as_str();
     }
     result
 }
@@ -69,14 +76,17 @@ pub fn insert_data(sample: bool) -> String {
         Color::Green.paint("valA,valB,valC..."),
     );
     if sample {
-        result = result + "\n" + format!(
-            "{} {} ({}) {} ({})",
-            Color::Red.bold().paint("Insert Into"),
-            Color::Green.paint("users"),
-            Color::Green.paint("(id, username, password, email)"),
-            Color::Red.bold().paint("Values"),
-            Color::Green.paint("(1, 'user1', 'password1', 'user1@qq.com')"),
-        ).as_str();
+        result = result
+            + "\n"
+            + format!(
+                "{} {} ({}) {} ({})",
+                Color::Red.bold().paint("Insert Into"),
+                Color::Green.paint("users"),
+                Color::Green.paint("(id, username, password, email)"),
+                Color::Red.bold().paint("Values"),
+                Color::Green.paint("(1, 'user1', 'password1', 'user1@qq.com')"),
+            )
+            .as_str();
     }
     result
 }
@@ -89,16 +99,18 @@ pub fn delete_data(sample: bool) -> String {
         Color::RGB(240, 240, 240).paint("<where conditions>")
     );
     if sample {
-        result = result + "\n" + format!(
-            "{} {} {}",
-            Color::Red.bold().paint("Delete from"),
-            Color::Green.paint("users"),
-            Color::RGB(240, 240, 240).paint("Where id>3")
-        ).as_str();
+        result = result
+            + "\n"
+            + format!(
+                "{} {} {}",
+                Color::Red.bold().paint("Delete from"),
+                Color::Green.paint("users"),
+                Color::RGB(240, 240, 240).paint("Where id>3")
+            )
+            .as_str();
     }
     result
 }
-
 
 pub fn update_data(sample: bool) -> String {
     let mut result = format!(
@@ -147,9 +159,13 @@ pub fn drop_db() -> String {
 }
 
 pub fn show_dbs() -> String {
-    format!(
-        "{}",
-        Color::Red.bold().paint("sys showdb"),
-    )
+    format!("{}", Color::Red.bold().paint("sys showdb"),)
 }
 
+pub fn change_pwd() -> String {
+    format!(
+        "{} {}",
+        Color::Red.bold().paint("sys changepwd"),
+        Color::Green.paint("newpwd"),
+    )
+}
