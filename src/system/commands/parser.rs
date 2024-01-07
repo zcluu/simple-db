@@ -1,6 +1,8 @@
 use crate::database;
 use crate::system::commands::r#type::{CommandType, SysCommand};
 use crate::system::commands::{normal as NC, system as SC};
+use crate::system::dbs::DbSystem;
+use ansi_term::Color;
 
 pub fn process_sys_command(query: String, db: &mut database::db::Database) {
     let command_type = match SysCommand::new(query.clone()) {
@@ -12,25 +14,59 @@ pub fn process_sys_command(query: String, db: &mut database::db::Database) {
     };
     match command_type {
         SysCommand::CreateDatabase => match SC::create_db(query.as_str()) {
-            Ok(_) => {}
+            Ok(_) => {
+                println!(
+                    "{}",
+                    Color::Green.bold().paint("Create Database Successfully!")
+                )
+            }
             Err(err) => {
-                println!("{}", err)
+                println!("{}", Color::Red.bold().paint(err))
             }
         },
         SysCommand::UseDatabase => match SC::use_db(query, db) {
-            Ok(_) => {}
+            Ok(_) => {
+                println!(
+                    "{}",
+                    Color::Green.bold().paint("Change Database Successfully!")
+                )
+            }
             Err(err) => {
-                println!("{}", err)
+                println!("{}", Color::Red.bold().paint(err))
             }
         },
         SysCommand::DropDatabase => match SC::drop_db(query) {
-            Ok(_) => {}
+            Ok(_) => {
+                println!(
+                    "{}",
+                    Color::Green.bold().paint("Drop Database Successfully!")
+                )
+            }
             Err(err) => {
-                println!("{}", err)
+                println!("{}", Color::Red.bold().paint(err))
             }
         },
-        SysCommand::ShowDatabases => SC::show_databases().unwrap(),
-        SysCommand::ChangePassword => {}
+        SysCommand::ShowDatabases => match SC::show_databases() {
+            Ok(_) => {}
+            Err(err) => {
+                println!("{}", Color::Red.bold().paint(err))
+            }
+        },
+        SysCommand::ChangePassword => {
+            let vars = query.split(" ").collect::<Vec<&str>>();
+            let mut sys = DbSystem::new();
+            match sys.change_pwd(vars[2].to_string()) {
+                Ok(_) => {
+                    println!(
+                        "{}",
+                        Color::Green.bold().paint("Change Password Successfully!")
+                    )
+                }
+                Err(err) => {
+                    println!("{}", Color::Red.bold().paint(err))
+                }
+            }
+        }
         SysCommand::HelpTips => SC::help(query),
         SysCommand::SysInfo => {}
     }
