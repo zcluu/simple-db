@@ -12,3 +12,7 @@ serde_json = "*"
 sha2 = "*"
 hex = "*"
 regex = "*"
+ansi_term = "*"
+
+[package.metadata.build-override]
+build = "build.rs"
