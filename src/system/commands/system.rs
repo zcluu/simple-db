@@ -20,7 +20,7 @@ pub fn create_db(command: &str) -> Result<(), Errors> {
     let db_name = vars[2];
     let mut db = Database::new();
     db.set_dbname(db_name.to_string());
-    Ok(db.save_disk().map_err(|e| Errors::DiskSaveError)?)
+    Ok(db.save_disk().map_err(|_| Errors::DiskSaveError)?)
 }
 
 pub fn use_db(command: String, db: &mut Database) -> Result<(), Errors> {
@@ -33,7 +33,7 @@ pub fn use_db(command: String, db: &mut Database) -> Result<(), Errors> {
     }
     Ok(db
         .load_from_disk(file_path.as_str())
-        .map_err(|e| Errors::FileSystemError)?)
+        .map_err(|_| Errors::FileSystemError)?)
 }
 
 pub fn drop_db(command: String) -> Result<(), Errors> {
@@ -41,7 +41,7 @@ pub fn drop_db(command: String) -> Result<(), Errors> {
     assert_eq!(vars.len(), 3);
     let db_name = vars[2];
     let file_path = format!("sql_files/{}.bin", db_name);
-    Ok(fs::remove_file(file_path).map_err(|e| Errors::DatabaseNotExisted)?)
+    Ok(fs::remove_file(file_path).map_err(|_| Errors::DatabaseNotExisted)?)
 }
 
 pub fn show_databases() -> std::io::Result<()> {

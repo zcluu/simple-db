@@ -1,4 +1,3 @@
-use crate::parser::utils::parse_sql;
 use crate::system::errors::Errors;
 use sqlparser::ast::Statement;
 

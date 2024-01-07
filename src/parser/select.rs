@@ -1,6 +1,5 @@
 use crate::parser::condition::Condition;
 use crate::parser::join::FromType;
-use crate::parser::utils::parse_sql;
 use crate::system::errors::Errors;
 use sqlparser::ast::{SetExpr, Statement};
 use std::option::Option;
@@ -13,7 +12,6 @@ pub enum BinaryOpCus {
     And,
     Or,
     IsNull,
-    IsTrue,
     Like,
 }
 

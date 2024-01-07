@@ -54,19 +54,6 @@ impl Table {
         }
     }
 
-    pub fn create(
-        name: String,
-        columns: Vec<ColumnAttr>,
-        col_map: HashMap<String, ColumnData>,
-    ) -> Table {
-        Table {
-            name,
-            columns,
-            col_map,
-            foreign_keys: None,
-        }
-    }
-
     pub fn insert_row(&mut self, cols: Vec<String>, rows: Vec<Vec<String>>) {
         let col_ix_map: HashMap<String, usize> = cols
             .iter()

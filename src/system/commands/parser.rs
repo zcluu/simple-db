@@ -21,7 +21,7 @@ pub fn process_sys_command(query: String, db: &mut database::db::Database) {
                 )
             }
             Err(err) => {
-                println!("{}", Color::Red.bold().paint(err))
+                println!("{}", Color::Red.bold().paint(format!("{:?}",err)))
             }
         },
         SysCommand::UseDatabase => match SC::use_db(query, db) {
@@ -32,7 +32,7 @@ pub fn process_sys_command(query: String, db: &mut database::db::Database) {
                 )
             }
             Err(err) => {
-                println!("{}", Color::Red.bold().paint(err))
+                println!("{}", Color::Red.bold().paint(format!("{:?}",err)))
             }
         },
         SysCommand::DropDatabase => match SC::drop_db(query) {
@@ -43,13 +43,13 @@ pub fn process_sys_command(query: String, db: &mut database::db::Database) {
                 )
             }
             Err(err) => {
-                println!("{}", Color::Red.bold().paint(err))
+                println!("{}", Color::Red.bold().paint(format!("{:?}",err)))
             }
         },
         SysCommand::ShowDatabases => match SC::show_databases() {
             Ok(_) => {}
             Err(err) => {
-                println!("{}", Color::Red.bold().paint(err))
+                println!("{}", Color::Red.bold().paint(format!("{:?}",err)))
             }
         },
         SysCommand::ChangePassword => {
@@ -63,7 +63,7 @@ pub fn process_sys_command(query: String, db: &mut database::db::Database) {
                     )
                 }
                 Err(err) => {
-                    println!("{}", Color::Red.bold().paint(err))
+                    println!("{}", Color::Red.bold().paint(format!("{:?}",err)))
                 }
             }
         }

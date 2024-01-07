@@ -1,5 +1,4 @@
 use crate::database::base::{ColumnAttr, DataType, ForeignKeyAttr};
-use crate::parser::utils::parse_sql;
 use crate::system::errors::Errors;
 use sqlparser::ast::{ColumnOption, DataType as ParserDataType, Statement, TableConstraint};
 

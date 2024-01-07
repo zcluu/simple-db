@@ -1,7 +1,5 @@
-use crate::parser::utils::parse_sql;
 use crate::system::errors::Errors;
 use sqlparser::ast::{Expr, Query, SetExpr, Statement, Value, Values};
-use sqlparser::dialect::AnsiDialect;
 
 #[derive(Debug)]
 pub struct InsertQuery {

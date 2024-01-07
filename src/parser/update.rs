@@ -1,6 +1,5 @@
 use crate::parser::condition::Condition;
 use crate::parser::join::FromType;
-use crate::parser::utils::parse_sql;
 use crate::system::errors::Errors;
 use crate::system::utils::custom_strip;
 use sqlparser::ast::Statement;

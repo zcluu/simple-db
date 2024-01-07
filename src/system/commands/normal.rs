@@ -46,7 +46,7 @@ pub fn drop_tb(query: String, db: &mut database::db::Database) {
         }
     };
     let query_result = DropQuery::format_stat(state);
-    let mut query = match query_result {
+    let query = match query_result {
         Ok(v) => v,
         Err(err) => {
             err.print();
@@ -146,7 +146,7 @@ pub fn update_data(query: String, db: &mut database::db::Database) {
             return;
         }
     };
-    let mut query = match UpdateQuery::format_stat(state) {
+    let query = match UpdateQuery::format_stat(state) {
         Ok(v) => v,
         Err(err) => {
             err.print();
@@ -211,7 +211,7 @@ pub fn delete_data(query: String, db: &mut database::db::Database) {
         }
     };
     let query_result = DeleteQuery::format_stat(state);
-    let mut query;
+    let query;
     match query_result {
         Ok(v) => query = v,
         Err(err) => {
