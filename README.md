@@ -1,85 +1,80 @@
-# SimpleDB Based on Rust
+# SimpleDB based on Rust
 
-## 开始使用
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-1. 安装环境
-2. xxx
+## Overview
 
-## 系统命令
+This is a database system developed based on Rust, which currently supports basic database operations and instructions,
+supports persistent storage, and is compatible with MySQL syntax.
 
-在使用系统命令时，除**登录**外，命令格式为`sys <command> <query> <others>`。
+## Getting Start
 
-### 用户管理
+To get started with RustDB, follow these steps:
 
-1. 登录
+1. Visit [Rust's official website](https://www.rust-lang.org/) to install the basic environment required for running
+   Rust programs.
 
-命令原型：`<username> <password>`
+2. Clone this repository to your local machine:
 
-2. 改密
+    ```bash
+    $ git clone https://github.com/DMSintalor/simple-db.git
+    ```
 
-命令原型：`sys changepwd <new_pwd>`
+3. Navigate to the project directory:
 
-### 数据库管理
+    ```bash
+    $ cd simple-db
+    ```
 
-#### 新建数据库
+4. Build and install RustDB:
+    ```bash
+    $ cargo build --release
+    ```
 
-命令原型：`sys createdb <db_name>`
+5. Execute SimpleDB
+   ```bash
+   $ cd target/release
+   $ run SimpleDB
+   ```
 
-Test Command:
+**Alternatively, you can use `cargo run` to start the program.**
 
-```sql
-CREATE TABLE users
-(
-    id       INT PRIMARY KEY,
-    username VARCHAR(50),
-    password VARCHAR(50),
-    email    VARCHAR(100)
-);
-```
+## Support Commands
 
-#### 切换数据库
+- [X] Create Table
+- [X] Drop Table
+- [X] Select Data
+    - [X] Inner Join
+    - [X] Multi Conditions
+        - [X] ``Like``
+        - [X] ``IS NULL``
+        - [X] ``< > =``
+        - [x] ``And Or``
+- [X] Insert Data into Table
+- [X] Delete Data from Table
+    - [X] Multi Conditions
+- [X] Update Data
+    - [X] Multi Conditions
+- [X] Create New Database
+- [X] Change Database
+- [X] Drop Database
+- [X] Change Password
 
-命令原型：`sys usedb <db_name>`
+### How to work
 
-#### 删除数据库
+1. SimpleDB-ClassMap
+   ![](figures/SimpleDB-ClassMap.png)
+2. Create Parser
+   ![](figures/CreateQueryProc.png)
+3. Select Parser
+   ![](figures/SelectQueryProc.png)
+4. Generate Conditions
+   ![](figures/CreateConditionProc.png)
 
-命令原型：`sys dropdb <db_name>`
+### Future Work
 
-#### 展示数据库
-
-命令原型：`sys showdb <db_name>`
-
-### 系统管理
-
-#### 系统信息
-
-命令原型：`sys showsys`
-
-## 数据表命令
-
-### 新建数据表
-
-### 插入数据
-
-```sql
-INSERT INTO users (id, username, password, email)
-VALUES (1, 'user1', 'password123', 'user1@example.com'),
-       (2, 'user2', 'pass456', 'user2@example.com'),
-       (3, 'user3', 'secret', 'user3@example.com');
-```
-
-### 选取数据
-
-```sql
-SELECT id, username, password, email
-FROM users;
-```
-
-支持多条件查询
-
-### TODO
-- 多表查询
-- 在表里查表
-- update
-- join
-- primary key
+- [ ] I/O Lock
+- [ ] BTree
+- [ ] Cloud Storage
+- [ ] Data Encryption With RSA
+- [ ] Support Python API like SQLchemy
