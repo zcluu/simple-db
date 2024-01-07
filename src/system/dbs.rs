@@ -1,8 +1,8 @@
 use crate::system::pwd::Password;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::io;
 use std::io::Write;
+use std::{fs, io};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct DbSystem {
@@ -41,5 +41,26 @@ impl DbSystem {
         let mut file = File::create("cfg.bin")?;
         file.write_all(serialized_data.as_bytes())?;
         Ok(())
+    }
+
+    pub fn init_cfg() {
+        let file_path = "cfg.bin".to_string();
+        if fs::metadata(file_path).is_ok() {
+            return;
+        } else {
+            eprintln!("Initializing the SimpleDB System.");
+            DbSystem {
+                sys_name: "SimpleDB System Based on Rust".to_string(),
+                sys_username: "root".to_string(),
+                sys_password: Password::new("123456"),
+            }
+            .update_info()
+            .unwrap();
+            if !fs::metadata("sql_files").is_ok() {
+                fs::create_dir("sql_files").unwrap();
+            }
+            eprintln!("Complete initialization.\nDefault username root, password 123456");
+            return;
+        }
     }
 }
