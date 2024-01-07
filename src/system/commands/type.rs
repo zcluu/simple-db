@@ -38,6 +38,7 @@ pub enum SysCommand {
     DropDatabase,
     ShowDatabases,
     ChangePassword,
+    HelpTips,
     SysInfo,
 }
 
@@ -50,6 +51,7 @@ impl SysCommand {
             "dropdb" => Ok(SysCommand::DropDatabase),
             "showdb" => Ok(SysCommand::ShowDatabases),
             "changepwd" => Ok(SysCommand::ChangePassword),
+            "help" => Ok(SysCommand::HelpTips),
             "showsys" => Ok(SysCommand::SysInfo),
             _ => Err(Errors::InvalidCommand),
         }

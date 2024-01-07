@@ -1,8 +1,10 @@
 use crate::database::db::Database;
 use crate::database::table::PrettyTable;
 use crate::system::errors::Errors;
+use ansi_term::Color;
 use std::collections::HashMap;
 use std::fs;
+use crate::system::tips;
 
 fn database_exists(db_name: &str) -> bool {
     let file_path = format!("sql_files/{}.bin", db_name);
@@ -63,4 +65,30 @@ pub fn show_databases() -> std::io::Result<()> {
     let pt = PrettyTable::new("All Databases".to_string(), db_header, col_values);
     println!("{}", pt);
     Ok(())
+}
+
+
+pub fn help(command: String) {
+    let vars = command.split(" ").collect::<Vec<&str>>();
+    if vars.len() == 2 {
+        println!("{}", Color::Yellow.bold().paint("Table Command"));
+        println!("{}", tips::create_table(false));
+        println!("{}", tips::drop_table(false));
+        println!("{}", tips::select_data(false));
+        println!("{}", tips::insert_data(false));
+        println!("{}", tips::delete_data(false));
+        println!("{}", tips::update_data(false));
+        println!("{}", Color::Yellow.bold().paint("System Command"));
+        println!("{}", tips::create_db());
+        println!("{}", tips::use_db());
+        println!("{}", tips::drop_db());
+        println!("{}", tips::show_dbs());
+    } else if vars.len() == 3 {
+        if vars[2].eq("create") { println!("{}", tips::create_table(true)) }
+        if vars[2].eq("drop") { println!("{}", tips::drop_table(true)) }
+        if vars[2].eq("select") { println!("{}", tips::select_data(true)) }
+        if vars[2].eq("insert") { println!("{}", tips::insert_data(true)) }
+        if vars[2].eq("delete") { println!("{}", tips::delete_data(true)) }
+        if vars[2].eq("update") { println!("{}", tips::update_data(true)) }
+    }
 }

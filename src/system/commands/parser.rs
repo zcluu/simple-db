@@ -31,6 +31,7 @@ pub fn process_sys_command(query: String, db: &mut database::db::Database) {
         },
         SysCommand::ShowDatabases => SC::show_databases().unwrap(),
         SysCommand::ChangePassword => {}
+        SysCommand::HelpTips => SC::help(query),
         SysCommand::SysInfo => {}
     }
 }
