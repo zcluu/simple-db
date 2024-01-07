@@ -1,6 +1,9 @@
 # SimpleDB based on Rust
 
 [![License](https://img.shields.io/github/license/DMSintalor/simple-db)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/DMSintalor/simple-db)](Stars)
+[![Forks](https://img.shields.io/github/forks/DMSintalor/simple-db)](Forks)
+
 
 ## Overview
 
@@ -77,4 +80,4 @@ To get started with RustDB, follow these steps:
 - [ ] BTree
 - [ ] Cloud Storage
 - [ ] Data Encryption With RSA
-- [ ] Support Python API like SQLchemy
+- [ ] Support Python API like SQLAlchemy
